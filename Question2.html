@@ -1,0 +1,94 @@
+<html>
+  <head>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  </head>
+
+  <body>
+    <h1>Enter login to search</h1>
+
+    <form id='users' action=''>
+      User Name: <input type='text' name='username'><br>
+      <input type='button' onclick = 'searchLogins()' value='Search'>
+    </form>
+
+    <div id='chartContainer' style='height: 300px; width: 100%;'></div>
+    <button onclick="nextPage()">Next Page</button>
+    <h3 id='page'><h3>
+
+    <script>
+      var onPage = 0;
+
+      function searchLogins() {
+        onPage++;
+        document.getElementById('page').innerHTML = 'Page: '+onPage;
+
+        var itemsPerPage = 5
+        var users = document.getElementById('users');
+        var url = 'https://api.github.com/search/users?q='+users[0].value+'&per_page='+itemsPerPage+'&page='+onPage;
+        // creating hash map for each letter because all letters are included in
+        // example diagram even if there is no value to them
+        var hash = {'A':0, 'B':0, 'C':0, 'D':0, 'E':0, 'F':0, 'G':0, 'H':0,
+        'I':0, 'J':0, 'K':0, 'L':0, 'M':0, 'N':0, 'O':0, 'P':0, 'Q':0, 'R':0,
+        'S':0, 'T':0, 'U':0, 'V':0, 'W':0, 'X':0, 'Y':0, 'Z':0, 'Other':0};
+
+        // Webcall
+        $.ajax({
+          url: url,
+          dataType: 'json',
+          async: false,
+          success: function(data) {
+          $.each(data.items, function(i, items) {
+            parseLogin(items['login'], hash);
+          });
+          }
+        });
+        createChart(hash);
+      }
+
+        function parseLogin(login, hash){
+          function isLetter(str) {
+            return str.length === 1 && str.match(/[a-z]/i);
+          }
+
+          login = login.toUpperCase()
+          for (let i = 0; i < login.length; i++){
+            var letter = login[i];
+            if (isLetter(letter)){
+              hash[letter]=hash[letter]+1;
+            } else {
+              hash['Other']=hash['Other']+1;
+            }
+          }
+        }
+
+        function createChart(hash){
+          // setting up datapoints
+          var dps = [];
+          Object.keys(hash).forEach(function (key) {
+              dps.push({label: key, y: hash[key]});
+            });
+
+          // rendering chart
+          var chart = new CanvasJS.Chart("chartContainer", {
+            axisX:{interval:1,},
+        		data: [{
+        			type: "column",
+        			dataPoints: dps
+        		}]
+        	});
+          chart.render();
+        }
+
+        function nextPage(){
+          if (onPage == 0){
+            window.alert('Error have not submited a search yet');
+          } else {
+            searchLogins();
+          }
+        }
+    </script>
+
+  </body>
+
+</html>

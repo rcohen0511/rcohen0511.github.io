@@ -1,0 +1,114 @@
+<html>
+  <head>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  </head>
+  <body>
+
+      <form id='inputs' action=''>
+        Chamber (ex: R....L) <input type='text' name='textInput'><br>
+        <input type='button' onclick = 'initialize()' value='Initialize'><br>
+        Speed <input type='number' name='speed'><br>
+        <input type='button' onclick = 'getanimate()' value='Animate'><br>
+      </form>
+      <h1 id='chamber'>test<h1>
+
+    <script>
+      class Animation {
+        constructor(init){
+          this.chamber = [];
+          this.particles = [];
+
+          for (let i = 0; i < init.length; i++){
+            this.chamber.push(['.']);
+            if (init[i] != '.'){
+              this.particles.push(new Particle(init[i],i,init.length));
+            }
+          }
+        }
+
+        animate(speed){
+          // this function loops through the particles array and call moveParticle
+          for (let i =0; i < this.particles.length; i++){
+            this.particles[i].moveParticle(speed);
+          }
+          animation.buildChamber();
+        }
+
+        buildChamber(){
+          // This function will use the blank chamber array, and the particle
+          // array to generate the chamber element displayed
+          var tempChamber = [];
+          var tempIndex = '.';
+          var result = '';
+
+          // building temp chamber
+          for (let i = 0; i < this.chamber.length; i++){
+            tempChamber.push(['.']);
+          }
+          // adding particles to temp Chamber
+          if (this.particles.length > 0){
+            for(let i = 0; i < this.particles.length; i++){
+              if (this.particles[i].exists){
+                tempChamber[this.particles[i].position].push(this.particles[i])
+              }
+            }
+          }
+
+          // printing temp chamber
+          for (let i = 0; i < tempChamber.length; i++){
+            for (let j = 0; j < tempChamber[i].length; j++){
+              if (typeof tempChamber[i][j] == "object"){
+                tempIndex = 'X'
+              } else {
+                tempIndex = '.'
+              }
+            }
+            result += tempIndex
+          }
+          document.getElementById('chamber').innerHTML = result;
+          return(result)
+        }
+      }
+
+      class Particle {
+        constructor(direction, index, initLen){
+          this.direction = direction;
+          this.position = index;
+          this.initLen = initLen;
+          this.exists = true;
+        }
+
+        moveParticle(speed){
+          // will update Particle.position based on direction/speed
+          var speed = parseInt(speed)
+          if (this.direction == 'R'){
+            this.position = this.position + speed;
+            if (this.position > this.initLen-1){
+              this.exists = false;
+            }
+          } else {
+            this.position = this.position - speed;
+            if (this.position < 0){
+              this.exists = false;
+            }
+          }
+        }
+      }
+
+      // Creates Animation Class
+      var animation;
+      function initialize(){
+        var init = document.getElementById('inputs');
+        animation = new Animation(init[0].value);
+        animation.buildChamber();
+      }
+
+      function getanimate(){
+        var init = document.getElementById('inputs');
+        animation.animate(init[2].value);
+      }
+
+    </script>
+  </body>
+</html>
